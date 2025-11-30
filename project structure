@@ -1,0 +1,27 @@
+forex-dashboard/
+│
+├── pages/
+│   ├── api/
+│   │   ├── rates.ts
+│   │   └── news.ts
+│   └── index.tsx
+│
+├── components/
+│   └── Chart.tsx
+│
+├── utils/
+│   └── indicators.ts
+│
+├── public/
+│   └── favicon.ico
+│
+├── styles/
+│   └── globals.css
+│
+├── .env.local      (not committed)
+├── next.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── tsconfig.json
+├── package.json
+└── README.md
