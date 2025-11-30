@@ -1,0 +1,32 @@
+import React, { useEffect, useRef } from "react";
+import { createChart, IChartApi, CandlestickData } from "lightweight-charts";
+
+export default function Chart({ candles }: { candles: any[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const chart = useRef<IChartApi>();
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    if (chart.current) chart.current.remove();
+    chart.current = createChart(ref.current, {
+      width: ref.current.clientWidth,
+      height: 400,
+    });
+
+    const series = chart.current.addCandlestickSeries();
+    const mapped: CandlestickData[] = candles.map(c => ({
+      time: c.time,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close
+    }));
+
+    series.setData(mapped);
+
+    return () => chart.current?.remove();
+  }, [candles]);
+
+  return <div ref={ref} className="w-full" />;
+}
