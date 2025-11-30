@@ -1,0 +1,12 @@
+# Forex Dashboard (Next.js + Vercel)
+
+A forex dashboard with:
+- Live FX intraday candles  
+- Candlestick chart  
+- News alerts  
+- Technical indicators (SMA/EMA/RSI)  
+- Auto polling  
+
+## How to run
+
+### 1. Install
