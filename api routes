@@ -1,0 +1,30 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios';
+
+const ALPHA = process.env.ALPHAVANTAGE_KEY;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const from = (req.query.from as string) || 'EUR';
+  const to = (req.query.to as string) || 'USD';
+  const interval = (req.query.interval as string) || '60min';
+
+  if (!ALPHA) return res.status(500).json({ error: 'Missing ALPHAVANTAGE_KEY' });
+
+  try {
+    const response = await axios.get("https://www.alphavantage.co/query", {
+      params: {
+        function: "FX_INTRADAY",
+        from_symbol: from,
+        to_symbol: to,
+        interval,
+        outputsize: "compact",
+        apikey: ALPHA
+      }
+    });
+
+    res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=59');
+    res.status(200).json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch FX rates" });
+  }
+}
