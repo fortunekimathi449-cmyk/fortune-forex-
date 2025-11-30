@@ -1,0 +1,25 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import axios from 'axios';
+
+const NEWSAPI_KEY = process.env.NEWSAPI_KEY;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (!NEWSAPI_KEY) return res.status(500).json({ error: 'Missing NEWSAPI_KEY' });
+
+  try {
+    const response = await axios.get("https://newsapi.org/v2/everything", {
+      params: {
+        q: req.query.q || "forex currency EUR USD",
+        sortBy: "publishedAt",
+        language: "en",
+        pageSize: 10,
+        apiKey: NEWSAPI_KEY
+      }
+    });
+
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    res.status(200).json(response.data);
+  } catch (err) {
+       res.status(500).json({ error: "Failed to fetch news" });
+  }
+}
