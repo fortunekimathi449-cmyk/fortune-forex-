@@ -1,0 +1,64 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Chart from "../components/Chart";
+import dayjs from "dayjs";
+
+export default function Home() {
+  const [candles, setCandles] = useState<any[]>([]);
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  async function fetchData() {
+    setLoading(true);
+    const r = await axios.get("/api/rates?from=EUR&to=USD&interval=60min");
+    const tsKey = Object.keys(r.data).find(k => k.includes("Time Series"));
+    const raw = r.data[tsKey];
+
+    const data = Object.entries(raw)
+      .map(([t, v]: any) => ({
+        time: dayjs(t).format("YYYY-MM-DD HH:mm"),
+        open: parseFloat(v["1. open"]),
+        high: parseFloat(v["2. high"]),
+        low: parseFloat(v["3. low"]),
+        close: parseFloat(v["4. close"]),
+      }))
+      .sort((a: any, b: any) => (a.time > b.time ? 1 : -1));
+
+    setCandles(data);
+    setLoading(false);
+  }
+
+  async function fetchNews() {
+    const r = await axios.get("/api/news?q=forex EUR USD");
+    setNews(r.data.articles || []);
+  }
+
+  useEffect(() => {
+    fetchData();
+    fetchNews();
+    const iv = setInterval(() => { fetchData(); fetchNews(); }, 60000);
+    return () => clearInterval(iv);
+  }, []);
+
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold">Forex Dashboard – EUR/USD</h1>
+
+      {loading && <p>Loading...</p>}
+
+      <div className="mt-4">
+        <Chart candles={candles} />
+      </div>
+
+      <h2 className="text-xl font-semibold mt-6">Latest Forex News</h2>
+      <ul>
+        {news.map((n, i) => (
+          <li key={i} className="my-3">
+            <a href={n.url} className="underline" target="_blank">{n.title}</a>
+            <div className="text-xs text-gray-500">{n.publishedAt}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
